@@ -40,7 +40,7 @@ struct ScreenChar {
     color_code: ColorCode,
 }
 
-const BUFFER_HEIGHT: usize = 1;
+const BUFFER_HEIGHT: usize = 25;
 const BUFFER_WIDTH: usize = 80;
 
 #[repr(transparent)]
@@ -49,6 +49,7 @@ struct Buffer {
 }
 
 pub struct Writer {
+    row_position: usize,
     column_position: usize,
     color_code: ColorCode,
     buffer: &'static mut Buffer,
@@ -64,13 +65,13 @@ impl fmt::Write for Writer {
 impl Writer {
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
-            b'\n' => self.new_line(),
+            b'\n' => { self.new_line(); },
             byte => {
                 if self.column_position >= BUFFER_WIDTH {
                     self.new_line();
                 }
 
-                let row = BUFFER_HEIGHT - 1;
+                let row = self.row_position;
                 let col = self.column_position;
 
                 let color_code = self.color_code;
@@ -93,30 +94,23 @@ impl Writer {
         }
     }
 
-    fn new_line(&mut self) {
-        for row in 1..BUFFER_HEIGHT {
-            for col in 0..BUFFER_WIDTH {
-                let character = self.buffer.chars[row][col].read();
-                self.buffer.chars[row - 1][col].write(character);
-            }
-        }
-        self.clear_row(BUFFER_HEIGHT + 1);
+    pub fn new_line(&mut self) {
+        self.row_position += 1;
         self.column_position = 0;
     }
-
-    fn clear_row(&mut self, row: usize) {/* TODO */}
 }
 
 pub fn print_something() {
     use core::fmt::Write;
     let mut writer = Writer {
+        row_position: 0,
         column_position: 0,
         color_code: ColorCode::new(Color::Yellow, Color::Black),
         buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
     };
 
     writer.write_byte(b'H');
-    writer.write_string("ello! ");
+    writer.write_string("ello!\n");
     write!(writer, "The numbers are {} and {}", 42, 1.0/3.0).unwrap();
 }
 
