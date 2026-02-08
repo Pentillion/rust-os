@@ -123,8 +123,51 @@ impl Writer {
     }
 
     pub fn new_line(&mut self) {
-        self.row_position += 1;
+        if self.row_position < BUFFER_HEIGHT -1 {
+            self.row_position += 1;
+        } else {
+            self.scroll_down();
+        }
         self.column_position = 0;
+    }
+
+    pub fn scroll_down(&mut self) {
+        for row in 1..BUFFER_HEIGHT {
+            for col in 0..BUFFER_WIDTH {
+                let ch = self.buffer.chars[row][col].read();
+                self.buffer.chars[row - 1][col].write(ch);
+            };
+        }
+
+        let blank_char = ScreenChar {
+            ascii_character: b' ',
+            color_code: self.color_code,
+        };
+
+        for col in 0..BUFFER_WIDTH {
+            self.buffer.chars[BUFFER_HEIGHT -1][col].write(blank_char);
+        }
     }
 }
 
+#[test_case]
+fn test_println_simple() {
+    println!("test_println_simple output");
+}
+
+#[test_case]
+fn test_println_many() {
+    for _ in 0..200 {
+        println!("test_println_many output");
+    }
+}
+
+#[test_case]
+fn test_println_output() {
+    let s = "Some test string that fits on a single line";
+    println!("{}", s);
+    for (i, c) in s.chars().enumerate() {
+        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
+        assert_eq!(char::from(screen_char.ascii_character), c);
+    }
+}
