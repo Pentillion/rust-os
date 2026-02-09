@@ -13,6 +13,10 @@ pub extern "C" fn _start() -> ! {
     #[cfg(test)]
     test_main();
 
+    rust_os::init();
+
+    x86_64::instructions::interrupts::int3();
+
     loop {}
 }
 
