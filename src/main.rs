@@ -14,17 +14,17 @@ pub extern "C" fn _start() -> ! {
     test_main();
 
     rust_os::init();
+    
+    // x86_64::instructions::interrupts::int3();
 
-    x86_64::instructions::interrupts::int3();
-
-    loop {}
+    rust_os::hlt_loop();
 }
 
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     println!("{}", _info);
-    loop {}
+    rust_os::hlt_loop();
 }
 
 #[cfg(test)]
