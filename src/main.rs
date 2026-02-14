@@ -15,6 +15,14 @@ pub extern "C" fn _start() -> ! {
 
     rust_os::init();
     
+    let ptr = 0x2050e6 as *mut u8;
+
+    unsafe { let _x = *ptr; }
+    println!("read worked");
+
+    unsafe { *ptr = 42 };
+    println!("write worked");
+    
     // x86_64::instructions::interrupts::int3();
 
     rust_os::hlt_loop();
