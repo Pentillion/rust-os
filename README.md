@@ -11,6 +11,6 @@ Goals:
 Status:
 
 - [x] Bare metal boot
-- [ ] VGA text buffer
-- [ ] Interrupts
+- [x] VGA text buffer
+- [x] Interrupts
 - [ ] Memory management
